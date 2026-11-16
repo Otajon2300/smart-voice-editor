@@ -20,6 +20,12 @@ $tag = "v$version"
 $zip = "dist\SmartVoiceEditor-$version.zip"
 $sum = "dist\SmartVoiceEditor-$version.sha256"
 
+# The online installer goes with every release, so .../releases/latest/download/<name> always works.
+$online = 'dist\SmartVoiceEditor-Online-Setup.exe'
+$csc = Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
+& $csc /nologo /codepage:65001 /optimize /target:winexe "/out:$online" '/r:System.IO.Compression.dll' '/r:System.IO.Compression.FileSystem.dll' '/r:System.Windows.Forms.dll' '/r:System.Drawing.dll' (Join-Path $PSScriptRoot 'installer\OnlineSetup.cs')
+if ($LASTEXITCODE -ne 0) { throw 'The online installer did not compile.' }
+
 & gh release view $tag --repo $Repo 2>&1 | Out-Null
 if ($LASTEXITCODE -eq 0) { throw "Release $tag already exists. Raise the version first." }
 
@@ -30,6 +36,6 @@ if ($LASTEXITCODE -ne 0) { Write-Host 'Nothing new to commit.' }
 if ($LASTEXITCODE -ne 0) { throw "Could not tag $tag." }
 & git @git push origin main --follow-tags
 if ($LASTEXITCODE -ne 0) { throw 'git push failed.' }
-& gh release create $tag $zip $sum --repo $Repo --title "Smart Voice Editor $version" --notes $Notes
+& gh release create $tag $zip $sum $online --repo $Repo --title "Smart Voice Editor $version" --notes $Notes
 if ($LASTEXITCODE -ne 0) { throw 'Could not create the GitHub release.' }
 Write-Host "Released $tag. Panels with internet will offer the update."

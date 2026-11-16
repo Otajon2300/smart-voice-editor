@@ -683,5 +683,5 @@ var SVE = (function () {
     }
     function template() { try { return JSON.stringify({path: titleTemplate('').replace(/\\/g, '/')}); } catch (e) { return JSON.stringify({path: ''}); } }
 
-    return {inspect: inspect, apply: apply, template: template, version: '1.1.5'};
+    return {inspect: inspect, apply: apply, template: template, version: '1.1.6'};
 }());

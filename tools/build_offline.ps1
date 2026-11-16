@@ -7,14 +7,16 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 Set-Location -LiteralPath $root
 
-# 1. Program files: the same package as an update (tests run here unless skipped).
-$arguments = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', (Join-Path $PSScriptRoot 'build_dist.ps1'))
-if ($SkipTests) { $arguments += '-SkipTests' }
-& powershell @arguments
-if ($LASTEXITCODE -ne 0) { throw 'Build failed.' }
+# 1. Program files: the very package of this version's release (built here, with tests, if there is none yet).
 $server = Get-Content -LiteralPath 'backend\server.py' -Raw -Encoding UTF8
 if ($server -notmatch "VERSION = '([\d.]+)'") { throw 'Version not found.' }
 $version = $Matches[1]
+if (-not (Test-Path -LiteralPath "dist\SmartVoiceEditor-$version.zip")) {
+    $arguments = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', (Join-Path $PSScriptRoot 'build_dist.ps1'))
+    if ($SkipTests) { $arguments += '-SkipTests' }
+    & powershell @arguments
+    if ($LASTEXITCODE -ne 0) { throw 'Build failed.' }
+}
 
 $work = Join-Path $root 'dist\offline-stage'
 $stage = Join-Path $work 'SmartVoiceEditor'

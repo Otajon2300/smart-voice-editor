@@ -1,4 +1,4 @@
-# Smart Voice Editor 1.1.5
+# Smart Voice Editor 1.1.6
 
 Premiere Pro uchun mahalliy CEP panel. Diktor yoki korrespondent ovozini Word ssenariysi bo‘yicha tozalaydi:
 qayta o‘qishlar va tugallanmagan urinishlar kesiladi, ortiqcha pauzalar tabiiy uzunlikkacha qisqartiriladi, nafas ovozlari olib tashlanadi,
@@ -141,6 +141,14 @@ Ichida Python, barcha kutubxonalar (CUDA bilan), o‘zbekcha modellar va Whisper
 administrator huquqi kerak emas. Sukut bo‘yicha `%LOCALAPPDATA%\SmartVoiceEditor` ga o‘rnatiladi.
 O‘rnatuvchini yig‘ish (shu kompyuterda, modellar yuklangan bo‘lishi kerak):
 `powershell -NoProfile -ExecutionPolicy Bypass -File tools\build_offline.ps1`.
+
+### Internet bor kompyuterga (onlayn o‘rnatuvchi)
+https://github.com/Otajon2300/smart-voice-editor/releases/latest/download/SmartVoiceEditor-Online-Setup.exe ni yuklab,
+Premiere’ni yoping va ishga tushiring. U eng yangi versiyani (SHA256 bilan), Python 3.12 ni (python.org NuGet paketi,
+tizimga o‘rnatilmaydi), kutubxonalarni (NVIDIA drayveri bo‘lsa CUDA bilan) va tanlangan modellarni yuklab, panelni
+Premiere’ga ulaydi. Administrator huquqi kerak emas. Oynasiz: `SmartVoiceEditor-Online-Setup.exe /silent "<papka>" uz ru`
+(jurnal `<papka>.install.log`, muvaffaqiyatda chiqish kodi 0). Exe imzolanmagan: Windows SmartScreen ogohlantirsa
+«More info → Run anyway».
 
 ### Yangilanish (GitHub)
 Internet bo‘lsa, panel ochilganda https://github.com/Otajon2300/smart-voice-editor dagi oxirgi relizni tekshiradi va
