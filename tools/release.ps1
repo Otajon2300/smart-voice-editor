@@ -4,7 +4,9 @@
 #   2. powershell -NoProfile -ExecutionPolicy Bypass -File tools\release.ps1 -Notes "What changed"
 # Runs the tests, builds dist\SmartVoiceEditor-<version>.zip + .sha256, commits, tags and uploads them.
 param([Parameter(Mandatory = $true)][string]$Notes, [string]$Repo = 'Otajon2300/smart-voice-editor')
-$ErrorActionPreference = 'Stop'
+# Native tools (git, gh) write notices to stderr; Windows PowerShell would stop on them, so every
+# step checks its exit code instead.
+$ErrorActionPreference = 'Continue'
 $root = Split-Path -Parent $PSScriptRoot
 Set-Location -LiteralPath $root
 $git = @('-c', ('safe.directory=' + $root.Replace('\', '/')))
@@ -18,7 +20,7 @@ $tag = "v$version"
 $zip = "dist\SmartVoiceEditor-$version.zip"
 $sum = "dist\SmartVoiceEditor-$version.sha256"
 
-& gh release view $tag --repo $Repo *> $null
+& gh release view $tag --repo $Repo 2>&1 | Out-Null
 if ($LASTEXITCODE -eq 0) { throw "Release $tag already exists. Raise the version first." }
 
 & git @git add -A
