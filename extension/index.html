@@ -1,0 +1,58 @@
+<!doctype html><html lang="uz"><head><meta charset="utf-8"><title>Smart Voice Editor</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<header><span class="tag">SMART VOICE · 1.1.5</span><span class="brand">otashDEV</span>
+<div id="update" class="update" hidden><span id="update-text"></span><button id="update-now">Yangilash</button></div><h1>Ovozni matn bo‘yicha tozalash</h1>
+<p>Takror o‘qishlar, uzun pauzalar va nafaslar — ishlab turgan sequence’ingiz ichida. Hammasi shu kompyuterda ishlaydi.</p></header>
+
+<section>
+ <button id="select">1. Timeline’da tanlangan ovoz klip(lar)ini olish</button>
+ <div id="clip" class="muted">Diktor ovozini bitta audio trekda tanlang (bir yoki ketma-ket bir nechta klip). Video va boshqa treklar o‘zgarmaydi.</div>
+ <button id="pick-script" class="file">2. Ssenariy(lar)ni tanlash (.docx yoki .txt)</button>
+ <div id="script-list" class="muted">Tanlanmagan</div><input type="file" id="script" accept=".docx,.txt" multiple hidden>
+ <label class="check"><input id="strict" type="checkbox" checked>Ssenariydan oldingi va keyingi ortiqcha gaplarni ham kesish</label>
+ <label class="check"><input id="pauses" type="checkbox" checked>Uzun pauzalarni tabiiy uzunlikkacha qisqartirish</label>
+ <label class="check"><input id="breaths" type="checkbox" checked>Nafas olish ovozlarini kesish</label>
+ <details><summary>Qo‘shimcha</summary>
+  <label class="field">Nutq modeli<select id="mode"><option value="auto">Avtomatik (tanlangan tilga qarab)</option><option value="uzbek_hq">O‘zbekcha aniq — Kotib Medium</option><option value="uzbek">O‘zbekcha tez — Small</option><option value="russian">Ruscha — Whisper Medium</option></select></label>
+  <label class="check"><input type="checkbox" id="use-gpu" checked>Videokartadan foydalanish (ishlamasa o‘zi CPU’ga o‘tadi)</label>
+  <button id="pause-cleanup">Faqat pauza va nafaslarni tozalash — Word kerak emas</button>
+ </details>
+ <label class="field">Yozuv tili<select id="language"><option value="">— tilni tanlang —</option><option value="uz">O‘zbekcha</option><option value="ru">Ruscha</option><option value="en">Inglizcha</option></select></label>
+ <label class="check"><input type="checkbox" id="auto-apply" checked>Tahlil tugagach o‘zi sequence’ga qo‘llasin (belgi olinsa — avval ko‘rib, keyin 4-tugma)</label>
+ <button id="analyze" class="primary">3. Tahlil qilish</button>
+ <button id="cancel" hidden>Tahlilni bekor qilish</button>
+ <div id="progress" role="status" class="muted">Tahlil boshlanmagan.</div>
+</section>
+
+<section id="results" hidden>
+ <div id="summary"></div>
+ <div id="stats" class="muted"></div>
+ <div id="warning" role="alert" hidden></div>
+ <div class="player"><audio id="player" preload="auto"></audio>
+  <div class="times"><button id="play-result">▶ Natijani boshidan</button><button id="play-original">▶ Asl yozuv</button><button id="stop">■</button></div>
+  <div id="now" class="muted"></div></div>
+
+ <details class="group"><summary>Takror o‘qishlar va ortiqcha nutq <span id="item-count" class="muted"></span></summary>
+  <label class="check"><input type="checkbox" id="show-uncertain">Ssenariyda yo‘q, saqlanadigan so‘zlarni ham ko‘rsatish</label>
+  <div id="items"></div></details>
+
+ <details class="group" id="gaps-section"><summary>Intervyu / stendap uchun bo‘sh joylar <span id="gap-count" class="muted"></span></summary><div id="gaps"></div></details>
+
+ <details class="group"><summary>Pauza va nafaslar <span id="pause-count" class="muted"></span></summary>
+  <label class="check"><input type="checkbox" id="show-pauses">Har bir pauzani alohida ko‘rsatish</label>
+  <div id="pause-list"></div></details>
+
+ <details><summary>Tanilgan matn va o‘qilmagan ssenariy so‘zlari</summary><pre id="transcript"></pre><pre id="missing"></pre></details>
+
+ <details class="group"><summary>Qo‘llash sozlamalari</summary>
+ <label class="check"><input type="checkbox" id="titles" checked>Bo‘sh joylarga titr qo‘yish (СНХР/stendap matni bilan)</label>
+ <label class="check"><input type="checkbox" id="titles-edit" checked>Titr tahrirlanadigan matn bo‘lsin (Essential Graphics); bo‘lmasa — rasm</label>
+ <label class="check"><input type="checkbox" id="titles-off" checked>Titrlarni o‘chirilgan (disabled) klip qilib qo‘yish — timeline’da ko‘rinadi, eksportga chiqmaydi</label>
+ <label class="check"><input type="checkbox" id="crossfade">Har bir kesimga 1 kadrlik crossfade (Constant Power) qo‘yish — «Natija»da ham eshitiladi</label>
+ <label class="check"><input type="checkbox" id="shift" checked>Natija sig‘masa, shu trekdagi keyingi kliplarni surish</label>
+ <label class="check"><input type="checkbox" id="backup">Avval sequence’ning zaxira nusxasini saqlash (loyihada yangi sequence paydo bo‘ladi; ko‘p kesimda Undo yetmasligi mumkin)</label></details>
+ <div id="apply-status" role="status"></div>
+ <button id="apply" class="primary" disabled>4. Sequence ichida tozalash</button>
+</section>
+<footer>Faqat tanlangan audio kliplar o‘zgaradi, asl media fayli o‘zgarmaydi. Xato bo‘lsa loyihadagi «… — zaxira» sequence’ini oching yoki Edit → Undo bilan qaytaring.<br><button id="check-update" class="link">Yangilanishni tekshirish</button> <span id="update-status"></span></footer>
+<script src="bootstrap.js"></script><script src="panel.js"></script></body></html>

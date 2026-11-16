@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+.runtime.json
+*.log
+.cache/
+.backend.lock
+.dependencies.sha256
+reports/
+evaluation/
+dist/
+.models/
+*.wav
+*.mp3
+archive/
+runtime/
+.update/
+holat.md
