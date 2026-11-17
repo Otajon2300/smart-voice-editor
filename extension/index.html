@@ -1,26 +1,27 @@
 <!doctype html><html lang="uz"><head><meta charset="utf-8"><title>Smart Voice Editor</title><link rel="stylesheet" href="style.css"></head>
 <body>
-<header><span class="tag">SMART VOICE · 1.1.6</span><span class="brand">otashDEV</span>
-<div id="update" class="update" hidden><span id="update-text"></span><button id="update-now">Yangilash</button></div><h1>Ovozni matn bo‘yicha tozalash</h1>
-<p>Takror o‘qishlar, uzun pauzalar va nafaslar — ishlab turgan sequence’ingiz ichida. Hammasi shu kompyuterda ishlaydi.</p></header>
+<header><div class="top"><span class="tag">SMART VOICE · 1.1.7</span><span class="brand">otashDEV</span>
+<select id="ui-language" class="ui-language" data-i18n-title="uiLanguage"><option value="uz">UZ</option><option value="ru">RU</option><option value="en">EN</option></select></div>
+<div id="update" class="update" hidden><span id="update-text"></span><button id="update-now" data-i18n="updateNow">Yangilash</button></div><h1 data-i18n="title">Ovozni matn bo‘yicha tozalash</h1>
+<p data-i18n="intro">Takror o‘qishlar, uzun pauzalar va nafaslar — ishlab turgan sequence’ingiz ichida. Hammasi shu kompyuterda ishlaydi.</p></header>
 
 <section>
- <button id="select">1. Timeline’da tanlangan ovoz klip(lar)ini olish</button>
+ <button id="select" data-i18n="select">1. Timeline’da tanlangan ovoz klip(lar)ini olish</button>
  <div id="clip" class="muted">Diktor ovozini bitta audio trekda tanlang (bir yoki ketma-ket bir nechta klip). Video va boshqa treklar o‘zgarmaydi.</div>
- <button id="pick-script" class="file">2. Ssenariy(lar)ni tanlash (.docx yoki .txt)</button>
+ <button id="pick-script" class="file" data-i18n="pickScript">2. Ssenariy(lar)ni tanlash (.docx yoki .txt)</button>
  <div id="script-list" class="muted">Tanlanmagan</div><input type="file" id="script" accept=".docx,.txt" multiple hidden>
- <label class="check"><input id="strict" type="checkbox" checked>Ssenariydan oldingi va keyingi ortiqcha gaplarni ham kesish</label>
- <label class="check"><input id="pauses" type="checkbox" checked>Uzun pauzalarni tabiiy uzunlikkacha qisqartirish</label>
- <label class="check"><input id="breaths" type="checkbox" checked>Nafas olish ovozlarini kesish</label>
- <details><summary>Qo‘shimcha</summary>
-  <label class="field">Nutq modeli<select id="mode"><option value="auto">Avtomatik (tanlangan tilga qarab)</option><option value="uzbek_hq">O‘zbekcha aniq — Kotib Medium</option><option value="uzbek">O‘zbekcha tez — Small</option><option value="russian">Ruscha — Whisper Medium</option></select></label>
-  <label class="check"><input type="checkbox" id="use-gpu" checked>Videokartadan foydalanish (ishlamasa o‘zi CPU’ga o‘tadi)</label>
-  <button id="pause-cleanup">Faqat pauza va nafaslarni tozalash — Word kerak emas</button>
+ <label class="check"><input id="no-script" type="checkbox"><span data-i18n="noScript">Ssenariy yo‘q — faqat pauza va nafaslarni tozalash</span></label>
+ <label class="check" id="strict-row"><input id="strict" type="checkbox" checked><span data-i18n="strict">Ssenariydan oldingi va keyingi ortiqcha gaplarni ham kesish</span></label>
+ <label class="check"><input id="pauses" type="checkbox" checked><span data-i18n="pauses">Uzun pauzalarni tabiiy uzunlikkacha qisqartirish</span></label>
+ <label class="check"><input id="breaths" type="checkbox" checked><span data-i18n="breaths">Nafas olish ovozlarini kesish</span></label>
+ <details><summary data-i18n="more">Qo‘shimcha</summary>
+  <label class="field"><span data-i18n="model">Nutq modeli</span><select id="mode"><option value="auto" data-i18n="modeAuto">Avtomatik (tanlangan tilga qarab)</option><option value="uzbek_hq" data-i18n="modeUzbekHq">O‘zbekcha aniq — Kotib Medium</option><option value="uzbek" data-i18n="modeUzbek">O‘zbekcha tez — Small</option><option value="russian" data-i18n="modeRussian">Ruscha — Whisper Medium</option></select></label>
+  <label class="check"><input type="checkbox" id="use-gpu" checked><span data-i18n="gpu">Videokartadan foydalanish (ishlamasa o‘zi CPU’ga o‘tadi)</span></label>
  </details>
- <label class="field">Yozuv tili<select id="language"><option value="">— tilni tanlang —</option><option value="uz">O‘zbekcha</option><option value="ru">Ruscha</option><option value="en">Inglizcha</option></select></label>
- <label class="check"><input type="checkbox" id="auto-apply" checked>Tahlil tugagach o‘zi sequence’ga qo‘llasin (belgi olinsa — avval ko‘rib, keyin 4-tugma)</label>
- <button id="analyze" class="primary">3. Tahlil qilish</button>
- <button id="cancel" hidden>Tahlilni bekor qilish</button>
+ <label class="field" id="language-field"><span data-i18n="recordingLanguage">Yozuv tili</span><select id="language"><option value="" data-i18n="pickLanguage">— tilni tanlang —</option><option value="uz" data-i18n="uzbek">O‘zbekcha</option><option value="ru" data-i18n="russian">Ruscha</option><option value="en" data-i18n="english">Inglizcha</option></select></label>
+ <label class="check"><input type="checkbox" id="auto-apply" checked><span data-i18n="autoApply">Tahlil tugagach o‘zi sequence’ga qo‘llasin (belgi olinsa — avval ko‘rib, keyin 4-tugma)</span></label>
+ <button id="analyze" class="primary" data-i18n="analyze">3. Tahlil qilish</button>
+ <button id="cancel" hidden data-i18n="cancel">Tahlilni bekor qilish</button>
  <div id="progress" role="status" class="muted">Tahlil boshlanmagan.</div>
 </section>
 
@@ -29,30 +30,30 @@
  <div id="stats" class="muted"></div>
  <div id="warning" role="alert" hidden></div>
  <div class="player"><audio id="player" preload="auto"></audio>
-  <div class="times"><button id="play-result">▶ Natijani boshidan</button><button id="play-original">▶ Asl yozuv</button><button id="stop">■</button></div>
+  <div class="times"><button id="play-result" data-i18n="playResult">▶ Natijani boshidan</button><button id="play-original" data-i18n="playOriginal">▶ Asl yozuv</button><button id="stop">■</button></div>
   <div id="now" class="muted"></div></div>
 
- <details class="group"><summary>Takror o‘qishlar va ortiqcha nutq <span id="item-count" class="muted"></span></summary>
-  <label class="check"><input type="checkbox" id="show-uncertain">Ssenariyda yo‘q, saqlanadigan so‘zlarni ham ko‘rsatish</label>
+ <details class="group"><summary><span data-i18n="retakesGroup">Takror o‘qishlar va ortiqcha nutq</span> <span id="item-count" class="muted"></span></summary>
+  <label class="check"><input type="checkbox" id="show-uncertain"><span data-i18n="showUncertain">Ssenariyda yo‘q, saqlanadigan so‘zlarni ham ko‘rsatish</span></label>
   <div id="items"></div></details>
 
- <details class="group" id="gaps-section"><summary>Intervyu / stendap uchun bo‘sh joylar <span id="gap-count" class="muted"></span></summary><div id="gaps"></div></details>
+ <details class="group" id="gaps-section"><summary><span data-i18n="gapsGroup">Intervyu / stendap uchun bo‘sh joylar</span> <span id="gap-count" class="muted"></span></summary><div id="gaps"></div></details>
 
- <details class="group"><summary>Pauza va nafaslar <span id="pause-count" class="muted"></span></summary>
-  <label class="check"><input type="checkbox" id="show-pauses">Har bir pauzani alohida ko‘rsatish</label>
+ <details class="group"><summary><span data-i18n="pausesGroup">Pauza va nafaslar</span> <span id="pause-count" class="muted"></span></summary>
+  <label class="check"><input type="checkbox" id="show-pauses"><span data-i18n="showPauses">Har bir pauzani alohida ko‘rsatish</span></label>
   <div id="pause-list"></div></details>
 
- <details><summary>Tanilgan matn va o‘qilmagan ssenariy so‘zlari</summary><pre id="transcript"></pre><pre id="missing"></pre></details>
+ <details><summary data-i18n="transcriptGroup">Tanilgan matn va o‘qilmagan ssenariy so‘zlari</summary><pre id="transcript"></pre><pre id="missing"></pre></details>
 
- <details class="group"><summary>Qo‘llash sozlamalari</summary>
- <label class="check"><input type="checkbox" id="titles" checked>Bo‘sh joylarga titr qo‘yish (СНХР/stendap matni bilan)</label>
- <label class="check"><input type="checkbox" id="titles-edit" checked>Titr tahrirlanadigan matn bo‘lsin (Essential Graphics); bo‘lmasa — rasm</label>
- <label class="check"><input type="checkbox" id="titles-off" checked>Titrlarni o‘chirilgan (disabled) klip qilib qo‘yish — timeline’da ko‘rinadi, eksportga chiqmaydi</label>
- <label class="check"><input type="checkbox" id="crossfade">Har bir kesimga 1 kadrlik crossfade (Constant Power) qo‘yish — «Natija»da ham eshitiladi</label>
- <label class="check"><input type="checkbox" id="shift" checked>Natija sig‘masa, shu trekdagi keyingi kliplarni surish</label>
- <label class="check"><input type="checkbox" id="backup">Avval sequence’ning zaxira nusxasini saqlash (loyihada yangi sequence paydo bo‘ladi; ko‘p kesimda Undo yetmasligi mumkin)</label></details>
+ <details class="group"><summary data-i18n="applySettings">Qo‘llash sozlamalari</summary>
+ <label class="check"><input type="checkbox" id="titles" checked><span data-i18n="titles">Bo‘sh joylarga titr qo‘yish (СНХР/stendap matni bilan)</span></label>
+ <label class="check"><input type="checkbox" id="titles-edit" checked><span data-i18n="titlesEdit">Titr tahrirlanadigan matn bo‘lsin (Essential Graphics); bo‘lmasa — rasm</span></label>
+ <label class="check"><input type="checkbox" id="titles-off" checked><span data-i18n="titlesOff">Titrlarni o‘chirilgan (disabled) klip qilib qo‘yish — timeline’da ko‘rinadi, eksportga chiqmaydi</span></label>
+ <label class="check"><input type="checkbox" id="crossfade"><span data-i18n="crossfadeOption">Har bir kesimga 1 kadrlik crossfade (Constant Power) qo‘yish — «Natija»da ham eshitiladi</span></label>
+ <label class="check"><input type="checkbox" id="shift" checked><span data-i18n="shift">Natija sig‘masa, shu trekdagi keyingi kliplarni surish</span></label>
+ <label class="check"><input type="checkbox" id="backup"><span data-i18n="backupOption">Avval sequence’ning zaxira nusxasini saqlash (loyihada yangi sequence paydo bo‘ladi; ko‘p kesimda Undo yetmasligi mumkin)</span></label></details>
  <div id="apply-status" role="status"></div>
- <button id="apply" class="primary" disabled>4. Sequence ichida tozalash</button>
+ <button id="apply" class="primary" disabled data-i18n="apply">4. Sequence ichida tozalash</button>
 </section>
-<footer>Faqat tanlangan audio kliplar o‘zgaradi, asl media fayli o‘zgarmaydi. Xato bo‘lsa loyihadagi «… — zaxira» sequence’ini oching yoki Edit → Undo bilan qaytaring.<br><button id="check-update" class="link">Yangilanishni tekshirish</button> <span id="update-status"></span></footer>
-<script src="bootstrap.js"></script><script src="panel.js"></script></body></html>
+<footer><button id="check-update" class="link" data-i18n="checkUpdate">Yangilanishni tekshirish</button> <span id="update-status"></span></footer>
+<script src="bootstrap.js"></script><script src="i18n.js"></script><script src="panel.js"></script></body></html>

@@ -3,7 +3,8 @@
 // ticking a row sends the decision to /plan.
 const assert = require('assert/strict'), fs = require('fs'), path = require('path'), vm = require('vm');
 const file = path.join(__dirname, '..', 'extension', 'panel.js'), code = fs.readFileSync(file, 'utf8');
-assert.ok(!/=>|`|\b(?:let|const|class|async|await)\s/.test(code), 'panel.js must stay ES5 (CEP 7)');
+const i18n = fs.readFileSync(path.join(__dirname, '..', 'extension', 'i18n.js'), 'utf8');
+for (const source of [code, i18n]) assert.ok(!/=>|`|\b(?:let|const|class|async|await)\s/.test(source), 'panel code must stay ES5 (CEP 7)');
 const html = fs.readFileSync(path.join(__dirname, '..', 'extension', 'index.html'), 'utf8');
 const ids = new Set(Array.from(html.matchAll(/id="([^"]+)"/g), m => m[1]));
 for (const m of code.matchAll(/\$\('([^']+)'\)/g)) assert.ok(ids.has(m[1]), 'index.html has no #' + m[1]);
@@ -19,7 +20,7 @@ function node(tag) {
 }
 const elements = {}, requests = [], timers = [];
 const document = {getElementById: id => elements[id] || (elements[id] = node(id)), createElement: node,
-  createTextNode: t => ({textContent: String(t)})};
+  createTextNode: t => ({textContent: String(t)}), querySelectorAll: () => [], documentElement: {}};
 ['pauses', 'breaths', 'titles', 'shift', 'backup', 'titles-off', 'auto-apply'].forEach(id => { document.getElementById(id).checked = true; });
 const fakeHttp = {request(options, onResponse) {
   const req = {on() {}, setTimeout() {}, abort() {}, end(body) {
@@ -36,7 +37,14 @@ const window = {location: {pathname: '/' + file.replace(/\\/g, '/')}, SVEPanelEr
 const context = {window, document, console, Promise, JSON, Math, Number, String, Array, Object, Error, Date, URL, Blob: function () {},
   require: name => name === 'http' ? fakeHttp : name === 'fs' ? fakeFs : require(name), Buffer, process,
   setTimeout: (fn, ms) => { timers.push(fn); return timers.length; }, clearTimeout() {}, setInterval() {}, decodeURIComponent, encodeURI};
-vm.createContext(context); vm.runInContext(code, context);
+vm.createContext(context); vm.runInContext(i18n, context); vm.runInContext(code, context);
+
+// Every translation has Uzbek, Russian and English, and every key used in the page or the panel exists.
+const keys = window.SVEi18n.keys;
+for (const [key, row] of Object.entries(keys)) assert.ok(row.length === 3 && row.every(Boolean), 'translation ' + key);
+for (const m of html.matchAll(/data-i18n(?:-title)?="([^"]+)"/g)) assert.ok(keys[m[1]], 'no translation ' + m[1]);
+for (const m of code.matchAll(/\bt\('([A-Za-z]+)'/g)) assert.ok(keys[m[1]], 'no translation ' + m[1]);
+for (const m of code.matchAll(/KIND = \{([^}]+)\}/g)) for (const k of m[1].matchAll(/'([A-Za-z]+)'/g)) assert.ok(keys[k[1]], 'no translation ' + k[1]);
 assert.equal(window.SVEPanelReady, true);
 
 function junction(id, kind, extra) {
@@ -78,5 +86,26 @@ setImmediate(() => setImmediate(() => {
   // A recording that does not match the script is called out.
   context.show(Object.assign({}, result, {coverage: .21, low_coverage: true}), 'Tayyor');
   assert.match(elements.warning.textContent, /DIQQAT.*21%/);
-  console.log('Panel: ES5, element ids, rendering of proposals/unrecognised sound/gaps/pauses, warnings and re-planning passed');
+  // Russian interface: panel texts and Uzbek messages from the backend/Premiere are translated.
+  const L = window.SVEi18n;
+  L.set('ru');
+  context.show(result, 'Готово');
+  assert.match(elements.summary.textContent, /Узбекский язык · совпадение со сценарием 93\.0%/);
+  assert.match(elements.items.children[0].textContent, /Вырезается · Повторное чтение/);
+  assert.match(elements.items.children[0].textContent, /Перечитанное место/);
+  assert.equal(L.tr('Tayyor: 12.5 s olib tashlandi (4 bo‘lak), 3.0 s bo‘sh joy ochildi, 2 ta titr. Video va boshqa treklar o‘zgarmadi.'),
+    'Готово: удалено 12.5 s (фрагментов: 4), открыто 3.0 s пустого места, титров: 2. Видео и другие дорожки не изменились.');
+  assert.equal(L.tr('Gap oxiri'), 'Конец предложения');
+  assert.equal(L.tr('tekshirish: Ochiq sequence topilmadi.'), 'проверка: Открытая секвенция не найдена.');
+  L.set('en');
+  assert.equal(L.tr('Nutq tanilmoqda: 40%'), 'Recognising speech: 40%');
+  assert.equal(L.tr('Whisper Medium modeli yuklanmoqda…'), 'Loading the Whisper Medium model…');
+  L.set('uz');
+  assert.equal(L.tr('Gap oxiri'), 'Gap oxiri');
+
+  // "No script": the analysis needs no script file and asks for pauses only.
+  elements['no-script'].checked = true; elements['no-script'].onchange();
+  assert.equal(elements['script-list'].textContent, 'Ssenariy yo‘q');
+  assert.equal(elements.language.disabled, true);
+  console.log('Panel: ES5, element ids, rendering of proposals/unrecognised sound/gaps/pauses, warnings and re-planning, interface languages and no-script mode passed');
 }));

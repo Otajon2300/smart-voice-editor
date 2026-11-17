@@ -1,4 +1,4 @@
-# Smart Voice Editor 1.1.6
+# Smart Voice Editor 1.1.7
 
 Premiere Pro uchun mahalliy CEP panel. Diktor yoki korrespondent ovozini Word ssenariysi bo‘yicha tozalaydi:
 qayta o‘qishlar va tugallanmagan urinishlar kesiladi, ortiqcha pauzalar tabiiy uzunlikkacha qisqartiriladi, nafas ovozlari olib tashlanadi,
@@ -116,7 +116,9 @@ ham sonlar so‘z bilan solishtiriladi: `2024 года` → “две тысяч
 `21%` → “двадцать один процент”, `3,5`, `млн/млрд/тыс`. Tartib son faqat год/век va oy nomlari oldida; boshqa kelishiklar
 (masalan “с пяти до семи”) va `5-го`, `1990-е` kabi yozuvlar taxminan solishtiriladi.
 
-**Faqat pauzalarni tozalash** (Qo‘shimcha bo‘limida) Word’siz, faqat tovush bo‘yicha ishlaydi.
+**Ssenariy yo‘q** belgisi qo‘yilsa, faqat pauza va nafaslar tozalanadi — ssenariy va yozuv tili kerak emas, tovush bo‘yicha ishlaydi.
+
+**Panel tili.** Yuqori o‘ng burchakdagi UZ / RU / EN — panel yozuvlari o‘zbekcha, ruscha yoki inglizcha (tanlov eslab qolinadi).
 
 ## Premiere versiyalari bo‘yicha
 

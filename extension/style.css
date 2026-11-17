@@ -6,3 +6,5 @@ details.group{margin:10px 0}details.group>summary{cursor:pointer;font-weight:600
 .brand{margin-left:10px;font-size:10px;font-weight:600;letter-spacing:.08em;color:#3ddc84}
 
 .update{margin:10px 0;padding:10px;border:1px solid #3ddc84;border-radius:8px;background:#16291f;color:#c9f5dc;display:flex;gap:10px;align-items:center;justify-content:space-between}.update[hidden]{display:none}.update button{width:auto;margin:0;padding:6px 12px}button.link{width:auto;margin:6px 0 0;padding:0;background:none;border:0;color:#3ddc84;text-decoration:underline;cursor:pointer;font-size:11px}
+header .top{display:flex;align-items:center}select.ui-language{display:inline-block;width:auto;margin:0 0 0 auto;padding:2px 6px;font-size:11px;border-radius:5px}
+.check.off{opacity:.45}
