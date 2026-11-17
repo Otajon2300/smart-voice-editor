@@ -1,4 +1,4 @@
-# Publishes the current version as a GitHub release; installed panels offer it as an update.
+﻿# Publishes the current version as a GitHub release; installed panels offer it as an update.
 #   1. Raise the version everywhere (backend\server.py, extension\panel.js, extension\host.jsx,
 #      extension\index.html, extension\CSXS\manifest.xml, README.md).
 #   2. powershell -NoProfile -ExecutionPolicy Bypass -File tools\release.ps1 -Notes "What changed"
@@ -23,7 +23,7 @@ $sum = "dist\SmartVoiceEditor-$version.sha256"
 # The online installer goes with every release, so .../releases/latest/download/<name> always works.
 $online = 'dist\SmartVoiceEditor-Online-Setup.exe'
 $csc = Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
-& $csc /nologo /codepage:65001 /optimize /target:winexe "/out:$online" '/r:System.IO.Compression.dll' '/r:System.IO.Compression.FileSystem.dll' '/r:System.Windows.Forms.dll' '/r:System.Drawing.dll' (Join-Path $PSScriptRoot 'installer\OnlineSetup.cs')
+& $csc /nologo /codepage:65001 /optimize /target:winexe "/out:$online" "/win32icon:$(Join-Path $PSScriptRoot 'installer\logo.ico')" '/r:System.IO.Compression.dll' '/r:System.IO.Compression.FileSystem.dll' '/r:System.Windows.Forms.dll' '/r:System.Drawing.dll' (Join-Path $PSScriptRoot 'installer\OnlineSetup.cs')
 if ($LASTEXITCODE -ne 0) { throw 'The online installer did not compile.' }
 
 & gh release view $tag --repo $Repo 2>&1 | Out-Null

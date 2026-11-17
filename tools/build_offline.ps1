@@ -1,4 +1,4 @@
-# Builds the offline installer: dist\offline-<version>\SmartVoiceEditor-Setup.exe + SmartVoiceEditor.data.001, ...
+﻿# Builds the offline installer: dist\offline-<version>\SmartVoiceEditor-Setup.exe + SmartVoiceEditor.data.001, ...
 # Everything the program needs is inside: Python, packages (with CUDA), the Uzbek models and Whisper Medium
 # (Russian; English uses the same model). Copy the whole folder to the other computer and run Setup.exe.
 #   powershell -NoProfile -ExecutionPolicy Bypass -File tools\build_offline.ps1 [-SkipTests]
@@ -74,7 +74,7 @@ $src = Join-Path $PSScriptRoot 'installer'
 $refs = '/r:System.IO.Compression.dll', '/r:System.IO.Compression.FileSystem.dll', '/r:System.Windows.Forms.dll', '/r:System.Drawing.dll'
 & $csc /nologo /codepage:65001 /optimize /target:exe "/out:$work\pack.exe" @refs (Join-Path $src 'Pack.cs') (Join-Path $src 'Parts.cs')
 if ($LASTEXITCODE -ne 0) { throw 'pack.exe did not compile.' }
-& $csc /nologo /codepage:65001 /optimize /target:winexe "/out:$out\SmartVoiceEditor-Setup.exe" @refs (Join-Path $src 'Setup.cs') (Join-Path $src 'Parts.cs')
+& $csc /nologo /codepage:65001 /optimize /target:winexe "/out:$out\SmartVoiceEditor-Setup.exe" "/win32icon:$(Join-Path $src 'logo.ico')" @refs (Join-Path $src 'Setup.cs') (Join-Path $src 'Parts.cs')
 if ($LASTEXITCODE -ne 0) { throw 'Setup.exe did not compile.' }
 & "$work\pack.exe" $stage (Join-Path $out 'SmartVoiceEditor.data') $PartSize
 if ($LASTEXITCODE -ne 0) { throw 'Packing failed.' }

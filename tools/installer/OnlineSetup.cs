@@ -32,6 +32,7 @@ namespace SmartVoice
         OnlineSetupForm()
         {
             Text = "Smart Voice Editor — onlayn o'rnatish (otashDEV)";
+            try { Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath); } catch (Exception) { }
             ClientSize = new Size(600, 430);
             FormBorderStyle = FormBorderStyle.FixedDialog; MaximizeBox = false; StartPosition = FormStartPosition.CenterScreen;
             Font = new Font("Segoe UI", 9.5f);
