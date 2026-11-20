@@ -8,7 +8,7 @@ import numpy as np
 from helpers import Recording
 import asr
 import audio
-from audio import Acoustics, assemble, decode_span, write_wav
+from audio import Acoustics, RATE, assemble, decode_span, same_voice, write_wav
 
 
 class DecodeTests(unittest.TestCase):
@@ -77,6 +77,65 @@ class AcousticsTests(unittest.TestCase):
         self.assertLess(ac.sound_between(breath[0] - .3, breath[1] + .3), .1)
 
 
+def burst(rec, noise, seconds, level):
+    """Noise of the given colour glued to the end of the last word."""
+    n = int(seconds * RATE)
+    noise = noise[:n] * np.sin(np.pi * np.arange(n) / n)
+    rec.chunks.append((noise * level / np.sqrt(np.mean(noise ** 2)) + rec.rng.normal(0, .0008, n)).astype(np.float32))
+    rec.t += seconds
+    return rec.t - seconds, rec.t
+
+
+class SnatchedBreathTests(unittest.TestCase):
+    """A reader close to the microphone takes short, loud breaths right at the end of a word. By level and
+    length they look like the hiss that ends the word; by colour they are the reader's other breaths."""
+
+    def recording(self):
+        rec = Recording(5)
+        rec.room(.5)
+        for _ in range(10):                      # ordinary breaths: quiet, alone in a pause
+            rec.say('bugun yangi loyiha')
+            rec.room(.3)
+            rec.breath(.4)
+            rec.room(.3)
+        snatched, hiss = [], []
+        for _ in range(4):
+            rec.say('yoshlar ishtirok etdi')
+            snatched.append(burst(rec, np.diff(rec.rng.normal(0, 1, 4000)), .16, .012))   # the colour of Recording.breath
+            rec.room(.25)
+            rec.say('bugun ham')
+            spectrum = np.fft.rfft(rec.rng.normal(0, 1, 4000))
+            spectrum[np.fft.rfftfreq(4000, 1 / RATE) < 5000] = 0                          # an "s"
+            hiss.append(burst(rec, np.fft.irfft(spectrum, 4000), .16, .012))
+            rec.room(.25)
+        rec.say('sovrinlar oldi')
+        rec.room(.5)
+        return rec, snatched, hiss
+
+    def test_found_by_the_colour_of_the_other_breaths(self):
+        rec, snatched, hiss = self.recording()
+        spans = Acoustics(rec.audio).breath_spans
+        for a, b in rec.breaths + snatched:
+            self.assertTrue(any(s < b - .04 and e > a + .04 for s, e in spans), (a, b, spans))
+        for a, b in hiss:                        # the word keeps its last sound
+            self.assertFalse(any(s < b - .04 and e > a + .04 for s, e in spans), (a, b, spans))
+
+    def test_too_few_breaths_teach_nothing(self):
+        self.assertEqual(same_voice([(1., 1.3)] * 3, np.ones((1000, 20), np.float32), np.zeros(1000), np.zeros(1000, bool),
+                                    0., -60.), [])
+
+    def test_longest_sound(self):
+        rec = Recording(3)
+        rec.room(.5)
+        rec.word('bugun', .2)
+        rec.room(.3)
+        rec.word('mamlakatimizda', .6)
+        rec.room(.5)
+        ac = Acoustics(rec.audio)
+        self.assertAlmostEqual(ac.longest_sound(0, ac.duration), .6, delta=.06)
+        self.assertEqual(ac.longest_sound(0, .4), 0.)
+
+
 class CrossfadeTests(unittest.TestCase):
     def test_equal_power_fade_centred_on_the_join(self):
         from service import crossfade
@@ -121,6 +180,14 @@ class RecoveryTests(unittest.TestCase):
         words = [{'start': 1., 'end': 1.4}, {'start': 1.5, 'end': 2.}, {'start': 6., 'end': 6.5}]
         spans = [(.9, 2.1), (3., 5.), (5.9, 6.6), (8., 8.3)]
         self.assertEqual(asr.uncovered(spans, words), [(3., 5.)])   # 0.3 s of noise is not worth a second pass
+
+    def test_speech_under_a_stretched_word_is_uncovered(self):
+        # Whisper skipped a retake and stretched the word before it over the whole of it.
+        words = [{'word': ' рамках', 'start': 1., 'end': 8.2}, {'word': ' автобусной', 'start': 8.2, 'end': 8.9}]
+        found = asr.uncovered([(.9, 9.)], words)
+        self.assertEqual(len(found), 1)
+        self.assertLess(found[0][0], 2.2)
+        self.assertAlmostEqual(found[0][1], 8.08, places=2)
 
     def test_mode_follows_the_script_language(self):
         self.assertEqual(asr.choose_mode('auto', 'uz'), 'uzbek_hq')

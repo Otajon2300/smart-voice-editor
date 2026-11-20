@@ -12,7 +12,14 @@ from text import marked_tokens
 
 W = '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}'
 MC = '{http://schemas.openxmlformats.org/markup-compatibility/2006}'
-BREAKS = {W + 'br', W + 'tab', W + 'cr'}
+BREAKS = {W + 'br', W + 'cr'}
+# A message header pasted together with the text: "[19.11.2026 11:45] Name:".
+CHAT_HEADER = re.compile(r'^\s*\[\d{1,2}[./]\d{1,2}[./]\d{2,4},?\s+\d{1,2}:\d{2}(?::\d{2})?\]\s*[^:]{0,60}:\s*')
+# Credits ("Tasvirchi: J. Sultonov") and picture remarks ("Koson tumani kadrlari") are not read.
+CREDIT = re.compile(r'^\s*(?:tasvirchi|montaj\w*|operator|rejiss[yo]+r|muharrir|muallif|оператор|монтаж\w*|режисс[её]р|'
+                    r'редактор|тасвирчи|муҳаррир|муаллиф|автор)\s*[:\-–—]', re.I)
+FOOTAGE = re.compile(r'(?:kadrlar\w*|tasvirlar\w*|кадры|кадрлар\w*|тасвирлар\w*)\s*[.:]?\s*$', re.I)
+INITIAL = re.compile(r'(?:^|\s)[^\W\d_]\.\s*[^\W\d_]')
 # Tracked deletions and moves, field codes, and the legacy copy of a text box are not script text.
 SKIPPED = {W + 'del', W + 'delText', W + 'moveFrom', W + 'instrText', MC + 'Fallback'}
 LABELS = [
@@ -48,7 +55,21 @@ def paragraphs(path):
         raise ValueError('Word fayli ochilmadi: ' + str(path))
     result = []
     _collect(root, None, result)
-    return [text for text in (re.sub(r'[\s ]+', ' ', ''.join(parts)).strip() for parts in result) if text]
+    lines = [line for parts in result for line in _lines(''.join(parts))]
+    return [text for text in (re.sub(r'[\s ]+', ' ', CHAT_HEADER.sub('', line)).strip() for line in lines) if text]
+
+
+def _lines(text):
+    """Lines of one Word paragraph. A break in the middle of a sentence (the next line goes on in
+    lower case) is only a wrapped line; any other break starts a new script line."""
+    result = []
+    for line in text.split('\n'):
+        previous = result[-1].rstrip() if result else ''
+        if previous and line.strip() and line.strip()[0].islower() and not re.search(r'[.!?…:;»"”)]$', previous):
+            result[-1] = previous + ' ' + line
+        else:
+            result.append(line)
+    return result
 
 
 def text_paragraphs(path):
@@ -68,7 +89,7 @@ def text_paragraphs(path):
             continue
     else:
         raise ValueError('Matn fayli kodlanishi tanilmadi (UTF-8 qilib saqlang): ' + str(path))
-    return [line for line in (re.sub(r'[\s ]+', ' ', raw).strip() for raw in text.splitlines()) if line]
+    return [line for line in (re.sub(r'[\s ]+', ' ', CHAT_HEADER.sub('', raw)).strip() for raw in text.splitlines()) if line]
 
 
 def _collect(node, parts, result):
@@ -83,6 +104,8 @@ def _collect(node, parts, result):
         elif parts is not None and child.tag == W + 't':
             parts.append(child.text or '')
         elif parts is not None and child.tag in BREAKS:
+            parts.append('\n')  # Shift+Enter (text pasted from a messenger): the next line may be a label
+        elif parts is not None and child.tag == W + 'tab':
             parts.append(' ')
         elif parts is not None and child.tag == W + 'noBreakHyphen':
             parts.append('-')  # "2024‑yil" typed with a non-breaking hyphen is still two words
@@ -115,7 +138,11 @@ def label_of(text):
 
 def classify(text, has_labels):
     """(kind, spoken text, label)."""
+    if len(text.split()) <= 8 and not re.search(r'[.!?…]$', text.strip()) and (CREDIT.match(text) or FOOTAGE.search(text)):
+        return 'note', '', text
     kind, rest = label_of(text)
+    if kind == 'narration' and 0 < len(rest.split()) <= 4 and INITIAL.search(rest) and not re.search(r'[!?…]$', rest):
+        return 'note', '', text   # "Muxbir: X. Shomurodov" — a credit, not narration
     if kind == 'sync':
         # "СНХР: Name – position (на узб.яз.)" names the speaker; the words follow.
         spoken = rest if len(rest.split()) > 25 and re.search(r'[.!?]\s', rest) else ''

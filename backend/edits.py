@@ -360,7 +360,14 @@ def start_of(words, i, ac, earliest=None):
     if earliest is not None:
         preceding = min(preceding, earliest)
     limit = max(min(preceding, w['start']) - .1, w['start'] - .8)
-    found = ac.silent_run_before(min(w['end'], w['start'] + .06), limit, MIN_SILENCE)
+    reach = min(w['end'], w['start'] + .06)
+    # The ASR often starts a word in the pause before it, or at the breath taken there (a breath is not
+    # sound): the word begins where its sound does.
+    k, stop = ac.frame(reach), ac.frame(w['end'] - .05)
+    while k < stop and not ac.sound[k]:
+        k += 1
+    reach = max(reach, k / 100)
+    found = ac.silent_run_before(reach, limit, MIN_SILENCE)
     if found is None:
         return ac.quietest(min(w['start'] - .02, max(preceding, w['start'] - .2) - .06), w['start'] + .06), True, False
     # The ASR start may fall inside the silence: move on to the real onset.
@@ -488,11 +495,12 @@ def junctions(words, kept, info, ac, gap_at, scale, options):
 
 
 def edge(name, cut, dropped, keep, silence, ac):
-    """Trim before the first / after the last kept word. Unrecognised speech there is never cut silently."""
+    """Trim before the first / after the last kept word. Unrecognised speech there is never cut silently;
+    clicks, a chair and other short noises (no single sound as long as a word) are."""
     sound = ac.sound_between(*cut)
     return {'id': name, 'kind': 'edge', 'cut': cut, 'dropped': dropped, 'pause': keep, 'silence': round(silence, 3),
             'breath': 0., 'sound': round(sound, 3), 'tight': False, 'forced': bool(dropped),
-            'default': bool(dropped or sound < UNHEARD)}
+            'default': bool(dropped or ac.longest_sound(*cut) < UNHEARD)}
 
 
 def follows_script(info, left, right):

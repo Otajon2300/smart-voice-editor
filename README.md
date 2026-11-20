@@ -1,4 +1,4 @@
-# Smart Voice Editor 1.1.7
+# Smart Voice Editor 1.1.8
 
 Premiere Pro uchun mahalliy CEP panel. Diktor yoki korrespondent ovozini Word ssenariysi bo‘yicha tozalaydi:
 qayta o‘qishlar va tugallanmagan urinishlar kesiladi, ortiqcha pauzalar tabiiy uzunlikkacha qisqartiriladi, nafas ovozlari olib tashlanadi,
@@ -45,6 +45,16 @@ Uzluksiz nutq ichidan o‘tgan kesimlar ro‘yxatda **zich kesim** deb belgilana
 **Nafas.** Kesilgan nafas o‘rnida kamida 0.2 s pauza qoladi: yonidagi toza sukunat yetmasa, qolgani bo‘sh (klipsiz) joy
 bo‘lib ochiladi — titr ham, marker ham qo‘yilmaydi. 1.5–2 kHz atrofida shivirlaydigan sokin nafaslar ham aniqlanadi
 (faqat ikki tomoni jim bo‘lsa — so‘z oxiridagi “х/с” ga tegmaslik uchun).
+Mikrofonga yaqin o‘qiydigan diktor so‘z tugashi bilan qisqa (0.1–0.2 s), balandroq nafas oladi; ular shu diktorning
+aniq topilgan nafaslariga **tovush rangi** (spektr) bo‘yicha o‘xshashligidan topiladi (kamida 8 ta namuna bo‘lsa),
+so‘z oxiridagi “с/ш/х” esa boshqa rangda bo‘lgani uchun saqlanadi. So‘z boshiga yopishgan nafas ham kesiladi.
+
+**Tashlab ketilgan qayta o‘qish.** Whisper ba’zan birinchi urinishni yozmay, oldingi so‘zni uning ustiga “cho‘zib” qo‘yadi.
+Bunday joylar alohida qayta tanilib, takror sifatida kesiladi.
+
+**Ssenariy bitta abzas bo‘lsa** (Telegram’dan ko‘chirilgan matn, qatorlar Shift+Enter bilan): har bir qator alohida
+o‘qiladi, `Intervyu: …`, `Muxbir: …` belgilari tanilib, `[19.11.2026 11:45] Ism:` sarlavhalari, `Tasvirchi:` / `Montaj:`
+va “… kadrlari” qatorlari o‘qilmaydigan izoh deb olinadi.
 
 **Avtomatik qo‘llash.** “Tahlil tugagach o‘zi sequence’ga qo‘llasin” (sukut bo‘yicha yoqilgan) belgilangan bo‘lsa, 3-tugmadan
 keyin natija darhol sequence’ga qo‘llanadi (zaxira nusxa bilan). Avval ko‘rib chiqmoqchi bo‘lsangiz belgini oling — ro‘yxatlar

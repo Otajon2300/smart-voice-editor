@@ -11,7 +11,7 @@ import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-CACHE_VERSION = 'asr-v1'
+CACHE_VERSION = 'asr-v2'
 
 MODELS = {
     'uzbek_hq': {'name': 'Kotib Medium (o‘zbekcha)', 'path': 'kotib', 'language': 'uz',
@@ -240,9 +240,14 @@ class Engine:
 ENGINE = Engine()
 
 
+def spoken_end(word):
+    """Whisper stretches a word over the speech it skipped after it; no word lasts that long."""
+    return min(word['end'], word['start'] + .4 + .09 * len(word['word'].strip())) if word.get('word') else word['end']
+
+
 def uncovered(spans, words, minimum=.7, pad=.12):
     """Parts of VAD speech not covered by any recognised word (Whisper often drops a first take)."""
-    marks = sorted((w['start'] - pad, w['end'] + pad) for w in words)
+    marks = sorted((w['start'] - pad, spoken_end(w) + pad) for w in words)
     result = []
     for a, b in spans:
         cursor = a
@@ -281,7 +286,7 @@ def recover(audio, words, spans, mode, use_gpu, report, rate=16000, budget=.2):
             start, end = left + w['start'], left + w['end']
             if a - .05 <= (start + end) / 2 <= b + .05:
                 recovered.append(dict(w, start=round(start, 3), end=round(end, 3), recovered=True))
-    existing = [(w['start'], w['end']) for w in words]
+    existing = [(w['start'], spoken_end(w)) for w in words]
     merged = list(words) + [w for w in recovered
                             if not any(s <= (w['start'] + w['end']) / 2 <= e for s, e in existing)]
     return sorted(merged, key=lambda w: (w['start'], w['end'])), len(recovered)

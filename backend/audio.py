@@ -144,7 +144,8 @@ class Acoustics:
         # Close brief dips inside words (stop consonants) and drop isolated clicks.
         loud = close_runs(loud, 6, value=False)
         loud = close_runs(loud, 4, value=True)
-        self.sound = loud & ~self.breath        # speech-like sound
+        # Speech-like sound. A frame or two left over at the edge of a breath is not a sound of its own.
+        self.sound = close_runs(loud & ~self.breath, 4, value=True)
         self.clean = ~loud & ~self.breath       # silence that may stay in a pause
 
     def frame(self, seconds):
@@ -209,6 +210,12 @@ class Acoustics:
         """Seconds of speech-like sound in [a, b]."""
         return float(self.sound[self.frame(a):self.frame(b)].sum()) / 100
 
+    def longest_sound(self, a, b):
+        """Seconds of the longest unbroken speech-like sound in [a, b]."""
+        edges = np.diff(np.r_[False, self.sound[self.frame(a):self.frame(b)], False].astype(np.int8))
+        runs = np.flatnonzero(edges == -1) - np.flatnonzero(edges == 1)
+        return float(runs.max()) / 100 if len(runs) else 0.
+
     def breaths_between(self, a, b):
         return [(s, e) for s, e in self.breath_spans if s < b and e > a]
 
@@ -225,6 +232,8 @@ def close_runs(mask, size, value):
 
 
 WIDE = .8
+BANDS = 20     # 0-8 kHz
+SEEDS = 8      # breaths needed before their common colour can be trusted
 
 
 def breaths(audio, level=None):
@@ -237,6 +246,7 @@ def breaths(audio, level=None):
     compute_level = level is None or len(level) != count
     level = np.empty(count) if compute_level else level
     zcr, high, upper = np.empty(count), np.empty(count), np.empty(count)
+    bands = np.empty((count, BANDS), np.float32)      # 400 Hz bands: the colour of each frame
     window = np.hanning(size).astype(np.float32)
     split = int(2000 / 8000 * (size // 2 + 1))
     lower = int(1500 / 8000 * (size // 2 + 1))
@@ -250,6 +260,7 @@ def breaths(audio, level=None):
         power = np.abs(np.fft.rfft(frames * window, axis=1)) ** 2
         high[a:a + 20000] = power[:, split:].sum(1) / (power.sum(1) + 1e-12)
         upper[a:a + 20000] = power[:, lower:].sum(1) / (power.sum(1) + 1e-12)
+        bands[a:a + 20000] = power[:, :BANDS * 10].reshape(len(power), BANDS, 10).sum(2)
     speech_level = float(np.quantile(level, .9))
     real = level[level > -90]
     if len(real) < 100:
@@ -310,7 +321,78 @@ def breaths(audio, level=None):
                     continue
             found.append((start, end))
         result.extend(found)
-    return sorted(result)
+    result = sorted(result)
+    return sorted(result + same_voice(result, bands, level, voiced, speech_level, floor))
+
+
+def colour(bands, a, b):
+    """Spectral shape of frames [a, b): dB per band around their mean."""
+    shape = 10 * np.log10(bands[a:b].mean(0) + 1e-12)
+    return shape - shape.mean()
+
+
+def same_voice(found, bands, level, voiced, speech_level, floor):
+    """Breaths the rules above miss, found by their likeness to the ones they caught.
+
+    A reader who works close to the microphone snatches short, fairly loud breaths right at the end of
+    a word. By level and length they pass for the hiss that ends the word, but every breath of one
+    reader in one recording has the same colour, and it is not the colour of "с", "ш" or "х".
+    """
+    if len(found) < SEEDS:
+        return []
+    shapes = np.array([colour(bands, int(s * 100), int(np.ceil(e * 100))) for s, e in found])
+    template = np.median(shapes, axis=0)
+    centred = template - template.mean()
+    norm = float(np.sqrt((centred ** 2).sum())) + 1e-9
+
+    def likeness(shape):
+        return float((shape * centred).sum() / ((np.sqrt((shape ** 2).sum()) + 1e-9) * norm)),             float(np.sqrt(np.mean((shape - template) ** 2)))
+    if np.median([likeness(shape)[0] for shape in shapes]) < .8:
+        return []  # the caught breaths do not agree with each other: nothing to learn from
+    count = len(level)
+    smooth = bands.copy()
+    smooth[1:-1] += bands[:-2] + bands[2:]
+    frames = 10 * np.log10(smooth + 1e-12)
+    frames -= frames.mean(1, keepdims=True)
+    alike = (frames @ centred) / ((np.sqrt((frames ** 2).sum(1)) + 1e-9) * norm)
+    mark = (alike >= .7) & (level > floor + 4) & (level < speech_level - 7) & ~voiced
+    mark = close_runs(mark, 2, value=False)
+    soft = (alike >= .6) & (level > floor + 2) & (level < speech_level - 7) & ~voiced
+    taken = np.zeros(count, bool)
+    for s, e in found:
+        taken[max(0, int(s * 100) - 3):int(np.ceil(e * 100)) + 3] = True
+    edges = np.diff(np.r_[False, mark, False].astype(np.int8))
+    result = []
+    for a, b in zip(np.flatnonzero(edges == 1), np.flatnonzero(edges == -1)):
+        if not 10 <= b - a <= 100 or taken[a:b].any():
+            continue
+        match, distance = likeness(colour(bands, a, b))
+        median, top = float(np.median(level[a:b])), float(level[a:b].max())
+        if match < .82 or distance > 4.5 or median > speech_level - 9 or top < floor + 8:
+            continue
+        # A breath has a quiet moment on at least one side; a hiss inside a word has speech on both.
+        before, after = level[max(0, a - 8):a], level[b:b + 8]
+        if not ((len(before) and before.min() < median - 8) or (len(after) and after.min() < median - 8)):
+            continue
+        for _ in range(10):  # the faint onset and fade of the same breath
+            if a > 0 and soft[a - 1] and not taken[a - 1]:
+                a -= 1
+            else:
+                break
+        for _ in range(10):
+            if b < count and soft[b] and not taken[b]:
+                b += 1
+            else:
+                break
+        # Straight out of loud speech with no dip at all: the first moment may be the release of the
+        # word's last consonant ("лет", "девочек"), so it stays with the word.
+        if a >= 3 and level[a - 3:a].max() > speech_level - 6:
+            if b - a < 15:
+                continue
+            a += 5
+        taken[a:b] = True
+        result.append((a / 100, b / 100))
+    return result
 
 
 def speech_spans(audio):

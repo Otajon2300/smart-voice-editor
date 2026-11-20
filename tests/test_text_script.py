@@ -121,6 +121,24 @@ class ScriptTests(unittest.TestCase):
         self.assertEqual(paragraphs(docx_body(body)), ['salom dunyo yana bir'])
         self.assertEqual(tokenize(parse_script(docx_body(body)), 'uz')[0], ['salom', 'dunyo', 'yana', 'bir'])
 
+    def test_line_breaks_inside_one_paragraph_are_script_lines(self):
+        # Text pasted from a messenger: the whole script is one Word paragraph with Shift+Enter breaks.
+        lines = ['"Jarayon"', '', 'Muxbir: Hudud taraqqiyoti boshqaruv tizimida namoyon bo‘ladi. Bu tajriba muhim.', '',
+                 'Intervyu: Mahmud Qodirov — Xalq deputatlari Beruniy tumani Kengashi kotibi', '',
+                 'Muxbir: Hududni rivojlantirishda loyihalar muhim.',
+                 '[19.11.2026 11:45] ShoMuRoDov: Delegatsiya vakillari tajribalarni o‘rgandilar.', '',
+                 'INTERVYU: Xalilla Eshimbetov — deputat', '', 'Koson tumani kadrlari',
+                 'Muxbir: Uch kunlik tashrif yakunlandi.', '', 'Muxbir: X. Shomurodov', 'Tasvirchi: J. Sultonov',
+                 'Montaj: A. Ro‘ziboyev']
+        body = '<w:p><w:r>%s</w:r></w:p>' % '<w:br/>'.join('<w:t>%s</w:t>' % line for line in lines)
+        blocks = parse_script(docx_body(body))
+        self.assertEqual([b['kind'] for b in blocks],
+                         ['header', 'narration', 'sync', 'narration', 'sync', 'note', 'narration', 'note', 'note', 'note'])
+        self.assertEqual(blocks[2]['label'], 'Mahmud Qodirov — Xalq deputatlari Beruniy tumani Kengashi kotibi')
+        self.assertEqual(blocks[2]['text'], '')
+        self.assertNotIn('ShoMuRoDov', blocks[3]['text'])
+        self.assertIn('Delegatsiya vakillari', blocks[3]['text'])
+
     def test_tracked_deletions_and_field_codes_are_not_script(self):
         body = ('<w:p><w:r><w:t xml:space="preserve">bugun </w:t></w:r>'
                 '<w:del><w:r><w:delText>eski matn</w:delText></w:r></w:del>'

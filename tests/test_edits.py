@@ -192,6 +192,18 @@ class BreathTests(unittest.TestCase):
         for w in rec.words:
             self.assertLess(removed(cuts, w['start'], w['end']), .03, w)
 
+    def test_breath_at_the_start_of_a_word_is_cut(self):
+        # ...and the next word is often started at the breath taken before it, or in the pause before that.
+        for early in (.0, .12):
+            rec = self.recording(lambda r: r.breath(.3), room=.1)
+            a, b = rec.breaths[0]
+            words = [dict(w) for w in rec.words]
+            words[3]['end'] = words[4]['start'] = round(a - early, 3)
+            state, result, cuts, duration = plan(rec, self.TEXT, words=words)
+            self.assertGreater(removed(cuts, a, b), (b - a) * .7, early)
+            for w in rec.words:
+                self.assertLess(removed(cuts, w['start'], w['end']), .03, w)
+
     def test_cut_breath_leaves_open_space(self):
         # Almost no room tone around the breath: without the space the two words would run together.
         rec = self.recording(lambda r: r.breath(.4))
