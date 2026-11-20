@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ExtensionManifest Version="7.0" ExtensionBundleId="uz.smartvoice.editor" ExtensionBundleVersion="1.1.8" ExtensionBundleName="Smart Voice Editor">
- <ExtensionList><Extension Id="uz.smartvoice.editor.panel" Version="1.1.8"/></ExtensionList>
+<ExtensionManifest Version="7.0" ExtensionBundleId="uz.smartvoice.editor" ExtensionBundleVersion="1.1.9" ExtensionBundleName="Smart Voice Editor">
+ <ExtensionList><Extension Id="uz.smartvoice.editor.panel" Version="1.1.9"/></ExtensionList>
  <ExecutionEnvironment><HostList><Host Name="PPRO" Version="[11.0,99.9]"/></HostList><LocaleList><Locale Code="All"/></LocaleList><RequiredRuntimeList><RequiredRuntime Name="CSXS" Version="7.0"/></RequiredRuntimeList></ExecutionEnvironment>
  <DispatchInfoList><Extension Id="uz.smartvoice.editor.panel"><DispatchInfo><Resources><MainPath>./index.html</MainPath><ScriptPath>./host.jsx</ScriptPath><CEFCommandLine><Parameter>--enable-nodejs</Parameter></CEFCommandLine></Resources><Lifecycle><AutoVisible>true</AutoVisible></Lifecycle><UI><Type>Panel</Type><Menu>Smart Voice Editor</Menu><Geometry><Size><Width>420</Width><Height>720</Height></Size></Geometry></UI></DispatchInfo></Extension></DispatchInfoList>
 </ExtensionManifest>

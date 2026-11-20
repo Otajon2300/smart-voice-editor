@@ -206,16 +206,16 @@ class BreathTests(unittest.TestCase):
 
     def test_cut_breath_leaves_open_space(self):
         # Almost no room tone around the breath: without the space the two words would run together.
-        rec = self.recording(lambda r: r.breath(.4))
+        rec = self.recording(lambda r: r.breath(.4), room=.02)
         a, b = rec.breaths[0]
         state, result, cuts, duration = plan(rec, self.TEXT)
         self.assertGreater(removed(cuts, a, b), (b - a) * .7)
         before = [r for r in result['ranges'] if r.get('gapPlain')]
         self.assertEqual(len(before), 1, result['ranges'])
         found = [j for j in result['junctions'] if j['breath'] >= .1][0]
-        self.assertAlmostEqual(found['pause'], .2, delta=.011)
+        self.assertAlmostEqual(found['pause'], .12, delta=.011)
         self.assertGreater(before[0]['gapAfter'], .03)
-        self.assertLessEqual(before[0]['gapAfter'], .2)
+        self.assertLessEqual(before[0]['gapAfter'], .12)
         self.assertAlmostEqual(before[0]['gapAfter'] / .04, round(before[0]['gapAfter'] / .04), places=6)  # whole frames
         self.assertNotIn('gapLabel', before[0])
         self.assertAlmostEqual(result['stats']['space_seconds'], before[0]['gapAfter'], places=2)

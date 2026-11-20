@@ -4,7 +4,7 @@ var nodeRequire = typeof require === 'function' ? require : (window.cep_node && 
 if (!nodeRequire) throw Error('Panelning mahalliy modullari yuklanmadi. Premiere va panelni qayta oching.');
 var fs = nodeRequire('fs'), path = nodeRequire('path'), http = nodeRequire('http'), child = nodeRequire('child_process');
 var NodeBuffer = (window.cep_node && window.cep_node.Buffer) || (typeof Buffer !== 'undefined' ? Buffer : nodeRequire('buffer').Buffer);
-var VERSION = '1.1.8';
+var VERSION = '1.1.9';
 var panelDirectory = path.dirname(decodeURIComponent(window.location.pathname).replace(/^\/(?=[A-Za-z]:)/, ''));
 var root = path.dirname(fs.realpathSync(panelDirectory));
 var L = window.SVEi18n, t = L.t, tr = L.tr;

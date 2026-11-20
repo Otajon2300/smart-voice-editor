@@ -1,4 +1,4 @@
-# Smart Voice Editor 1.1.8
+# Smart Voice Editor 1.1.9
 
 Premiere Pro uchun mahalliy CEP panel. Diktor yoki korrespondent ovozini Word ssenariysi bo‘yicha tozalaydi:
 qayta o‘qishlar va tugallanmagan urinishlar kesiladi, ortiqcha pauzalar tabiiy uzunlikkacha qisqartiriladi, nafas ovozlari olib tashlanadi,
@@ -42,7 +42,7 @@ Nutq tanish (ASR) ba’zan so‘z yoki butun gapni yozmay ketadi. Dastur bunday 
 
 Uzluksiz nutq ichidan o‘tgan kesimlar ro‘yxatda **zich kesim** deb belgilanadi — ularni albatta eshiting.
 
-**Nafas.** Kesilgan nafas o‘rnida kamida 0.2 s pauza qoladi: yonidagi toza sukunat yetmasa, qolgani bo‘sh (klipsiz) joy
+**Nafas.** Kesilgan nafas o‘rnida kamida 0.12 s pauza qoladi: yonidagi toza sukunat yetmasa, qolgani bo‘sh (klipsiz) joy
 bo‘lib ochiladi — titr ham, marker ham qo‘yilmaydi. 1.5–2 kHz atrofida shivirlaydigan sokin nafaslar ham aniqlanadi
 (faqat ikki tomoni jim bo‘lsa — so‘z oxiridagi “х/с” ga tegmaslik uchun).
 Mikrofonga yaqin o‘qiydigan diktor so‘z tugashi bilan qisqa (0.1–0.2 s), balandroq nafas oladi; ular shu diktorning
@@ -95,8 +95,8 @@ Yozuv ssenariyga 50% dan kam mos kelsa (ehtimol boshqa fayl tanlangan), panel og
 | `1-АКТ`, `01:53–03:39 — …` kabi sarlavhalar, hujjat boshidagi efir sanasi/mavzu | E’tiborga olinmaydi |
 
 Har bir bo‘sh joyga bo‘sh video trekda titr (shaffof PNG, pastki tasmada СНХР/stendap matni) qo‘yiladi; klip nomi ham shu matn.
-Sukut bo‘yicha titr **o‘chirilgan (disabled) klip** bo‘lib qo‘yiladi: timeline’da ko‘rinadi, lekin tasodifan eksportga chiqmaydi.
-Ekranda ko‘rish kerak bo‘lsa “Titrlarni o‘chirilgan klip qilib qo‘yish” belgisini olib tashlang yoki klipni Enable qiling.
+Sukut bo‘yicha titr **yoqilgan (enabled)** klip bo‘lib qo‘yiladi. “Titrlarni o‘chirilgan (disabled) klip qilib qo‘yish” belgilansa,
+titr timeline’da ko‘rinadi, lekin eksportga chiqmaydi.
 Sequence markeridan farqli, titr timeline’da ko‘rinadi va keyingi montajda klip sifatida suriladi. Rasmlar `.cache/titles` da,
 loyihada **Smart Voice titrlar** papkasiga import qilinadi. Bo‘sh video trek bo‘lmasa yangi trek qo‘shiladi; bo‘lmasa marker qo‘yiladi.
 

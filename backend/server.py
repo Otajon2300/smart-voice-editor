@@ -26,7 +26,7 @@ for _stream in (sys.stdout, sys.stderr):
     except (AttributeError, ValueError):
         pass  # pythonw without redirection has no streams
 
-VERSION = '1.1.8'
+VERSION = '1.1.9'
 ROOT = Path(__file__).resolve().parents[1]
 RUNTIME = ROOT / '.runtime.json'
 IDLE_MINUTES = 30
